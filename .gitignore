@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# next
+.next/
+out/
+
+# env
+.env
+.env.*
+
+# logs
+*.log
+
+# misc
+.DS_Store
+
+# prisma
+apps/web/prisma/dev.db
+apps/web/prisma/dev.db-journal
+
+# vercel
+.vercel/
