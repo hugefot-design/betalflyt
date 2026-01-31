@@ -7,6 +7,42 @@ import { downloadInvoicePdf } from "@/lib/invoice/pdf";
 
 const STORAGE_KEY = "betalflyt:draft:v1";
 
+// Free plan guardrail: limit PDF exports per day (local only).
+const DAILY_EXPORT_LIMIT = 5;
+const EXPORT_COUNT_KEY = "betalflyt:exports:v1";
+
+function todayKey() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function readExportCountForToday() {
+  try {
+    const raw = localStorage.getItem(EXPORT_COUNT_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw) as { day?: string; count?: number };
+    if (parsed.day !== todayKey()) return 0;
+    return Number(parsed.count || 0);
+  } catch {
+    return 0;
+  }
+}
+
+function bumpExportCount() {
+  const day = todayKey();
+  const current = readExportCountForToday();
+  const next = Math.max(0, current) + 1;
+  try {
+    localStorage.setItem(EXPORT_COUNT_KEY, JSON.stringify({ day, count: next }));
+  } catch {
+    // ignore
+  }
+  return next;
+}
+
 const t = (lang: Lang) => {
   const dict = {
     en: {
@@ -69,6 +105,16 @@ export default function GeneratorPageEN() {
 
   const [invoice, setInvoice] = useState<Invoice>(() => loadJson<Invoice>(STORAGE_KEY, defaultInvoiceEN()));
   const [savedAt, setSavedAt] = useState<number | null>(null);
+
+  const [exportsToday, setExportsToday] = useState<number>(0);
+
+  useEffect(() => {
+    // localStorage is available only on client
+    setExportsToday(readExportCountForToday());
+  }, []);
+
+  const exportsLeft = Math.max(0, DAILY_EXPORT_LIMIT - exportsToday);
+  const exportLocked = exportsToday >= DAILY_EXPORT_LIMIT;
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -133,17 +179,44 @@ export default function GeneratorPageEN() {
             </button>
 
             <button
-              className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
-              onClick={() => downloadInvoicePdf(invoice, lang)}
+              className={`rounded-xl px-4 py-2 text-sm font-medium text-white ${
+                exportLocked ? "bg-zinc-400" : "bg-zinc-900 hover:bg-zinc-800"
+              }`}
+              disabled={exportLocked}
+              onClick={() => {
+                // Guardrail: limit free PDF exports per day
+                if (exportLocked) return;
+                downloadInvoicePdf(invoice, lang);
+                const next = bumpExportCount();
+                setExportsToday(next);
+              }}
             >
               {s.downloadPdf}
             </button>
           </div>
         </header>
 
-        <footer className="mt-10 text-center text-xs text-zinc-500">
-          No accounts. Your draft is saved locally in your browser.
-        </footer>
+        <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700">
+          <div className="font-medium">Free limit</div>
+          <div className="mt-1 text-zinc-600">
+            You can export up to <span className="font-medium">{DAILY_EXPORT_LIMIT}</span> invoice PDFs per day on the free plan.
+            {exportLocked ? (
+              <span className="text-red-600"> You’ve reached today’s limit.</span>
+            ) : (
+              <span> Remaining today: <span className="font-medium">{exportsLeft}</span>.</span>
+            )}
+          </div>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <a className="rounded-xl bg-zinc-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-zinc-800" href="/en/pricing">
+              Upgrade (coming)
+            </a>
+            <a className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-center text-sm hover:bg-zinc-50" href="/en/privacy">
+              Privacy
+            </a>
+          </div>
+        </div>
+
+        <footer className="mt-10 text-center text-xs text-zinc-500">No accounts. Your draft is saved locally in your browser.</footer>
       </div>
     </div>
   );
