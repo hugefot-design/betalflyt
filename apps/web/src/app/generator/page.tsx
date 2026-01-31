@@ -7,12 +7,12 @@ import { calc } from "@/lib/invoice/calc";
 import { money } from "@/lib/invoice/money";
 import { downloadInvoicePdf } from "@/lib/invoice/pdf";
 
-const STORAGE_KEY = "invoicespark:draft:v1";
+const STORAGE_KEY = "betalflyt:draft:v1";
 
 const t = (lang: Lang) => {
   const dict = {
     en: {
-      appName: "InvoiceSpark",
+      appName: "BetalFlyt",
       tagline: "Free invoice generator — download a clean PDF in seconds.",
       language: "Language",
       invoice: "Invoice",
@@ -46,7 +46,7 @@ const t = (lang: Lang) => {
       resetConfirm: "Reset draft?",
     },
     no: {
-      appName: "InvoiceSpark",
+      appName: "BetalFlyt",
       tagline: "Gratis fakturagenerator — last ned en pen PDF på sekunder.",
       language: "Språk",
       invoice: "Faktura",
@@ -101,23 +101,21 @@ function addDaysISO(days: number) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-// calc/money/downloadInvoicePdf are imported from lib
-
 function defaultInvoice(): Invoice {
   return {
     invoiceNumber: "1001",
     issueDate: todayISO(),
     dueDate: addDaysISO(14),
-    from: { name: "Your Business" },
-    to: { name: "Customer" },
-    currency: "USD",
+    from: { name: "Ditt firma" },
+    to: { name: "Kunde" },
+    currency: "NOK",
     notes: "",
-    items: [{ description: "Service", quantity: 1, unitPrice: 100, taxRatePct: 0 }],
+    items: [{ description: "Tjeneste", quantity: 1, unitPrice: 1000, taxRatePct: 0 }],
   };
 }
 
 export default function GeneratorPage() {
-  const [lang, setLang] = useState<Lang>("en");
+  const [lang, setLang] = useState<Lang>("no");
   const s = useMemo(() => t(lang), [lang]);
 
   const [invoice, setInvoice] = useState<Invoice>(() =>
@@ -165,9 +163,7 @@ export default function GeneratorPage() {
             <span className="ml-2 text-sm text-zinc-600">{s.language}:</span>
             <button
               className={`rounded-full px-3 py-1 text-sm ${
-                lang === "en"
-                  ? "bg-zinc-900 text-white"
-                  : "bg-white border border-zinc-200"
+                lang === "en" ? "bg-zinc-900 text-white" : "bg-white border border-zinc-200"
               }`}
               onClick={() => setLang("en")}
             >
@@ -175,9 +171,7 @@ export default function GeneratorPage() {
             </button>
             <button
               className={`rounded-full px-3 py-1 text-sm ${
-                lang === "no"
-                  ? "bg-zinc-900 text-white"
-                  : "bg-white border border-zinc-200"
+                lang === "no" ? "bg-zinc-900 text-white" : "bg-white border border-zinc-200"
               }`}
               onClick={() => setLang("no")}
             >
@@ -207,7 +201,6 @@ export default function GeneratorPage() {
           </div>
         </header>
 
-        {/* Share */}
         <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -264,306 +257,11 @@ export default function GeneratorPage() {
               Link: <span className="font-mono">/share/{shareId}</span>
             </div>
           ) : null}
-          {shareError ? (
-            <div className="mt-3 text-xs text-red-600">{shareError}</div>
-          ) : null}
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Editor */}
-          <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field
-                label={s.invoiceNumber}
-                value={invoice.invoiceNumber}
-                onChange={(v) => setInvoice((x) => ({ ...x, invoiceNumber: v }))}
-              />
-              <Field
-                label={s.currency}
-                value={invoice.currency}
-                onChange={(v) =>
-                  setInvoice((x) => ({
-                    ...x,
-                    currency: v.toUpperCase().slice(0, 3),
-                  }))
-                }
-                placeholder="USD / NOK / EUR"
-              />
-              <Field
-                type="date"
-                label={s.issueDate}
-                value={invoice.issueDate}
-                onChange={(v) => setInvoice((x) => ({ ...x, issueDate: v }))}
-              />
-              <Field
-                type="date"
-                label={s.dueDate}
-                value={invoice.dueDate}
-                onChange={(v) => setInvoice((x) => ({ ...x, dueDate: v }))}
-              />
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <PartyEditor
-                title={s.from}
-                party={invoice.from}
-                onChange={(party) => setInvoice((x) => ({ ...x, from: party }))}
-                labels={s}
-              />
-              <PartyEditor
-                title={s.to}
-                party={invoice.to}
-                onChange={(party) => setInvoice((x) => ({ ...x, to: party }))}
-                labels={s}
-              />
-            </div>
-
-            <div className="mt-6">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">{s.items}</h3>
-                <button
-                  className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm hover:bg-zinc-50"
-                  onClick={() =>
-                    setInvoice((x) => ({
-                      ...x,
-                      items: [
-                        ...x.items,
-                        {
-                          description: "",
-                          quantity: 1,
-                          unitPrice: 0,
-                          taxRatePct: 0,
-                        },
-                      ],
-                    }))
-                  }
-                >
-                  {s.addLine}
-                </button>
-              </div>
-
-              <div className="mt-3 space-y-3">
-                {invoice.items.map((it, idx) => (
-                  <div
-                    key={idx}
-                    className="grid grid-cols-1 gap-2 rounded-xl border border-zinc-200 p-3 sm:grid-cols-12 sm:items-end"
-                  >
-                    <div className="sm:col-span-5">
-                      <Field
-                        label={s.description}
-                        value={it.description}
-                        onChange={(v) =>
-                          setInvoice((x) => {
-                            const items = [...x.items];
-                            items[idx] = { ...items[idx], description: v };
-                            return { ...x, items };
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Field
-                        label={s.qty}
-                        type="number"
-                        value={String(it.quantity)}
-                        onChange={(v) =>
-                          setInvoice((x) => {
-                            const items = [...x.items];
-                            items[idx] = {
-                              ...items[idx],
-                              quantity: Number(v || 0),
-                            };
-                            return { ...x, items };
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Field
-                        label={s.unitPrice}
-                        type="number"
-                        value={String(it.unitPrice)}
-                        onChange={(v) =>
-                          setInvoice((x) => {
-                            const items = [...x.items];
-                            items[idx] = {
-                              ...items[idx],
-                              unitPrice: Number(v || 0),
-                            };
-                            return { ...x, items };
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Field
-                        label={s.tax}
-                        type="number"
-                        value={String(it.taxRatePct)}
-                        onChange={(v) =>
-                          setInvoice((x) => {
-                            const items = [...x.items];
-                            items[idx] = {
-                              ...items[idx],
-                              taxRatePct: Number(v || 0),
-                            };
-                            return { ...x, items };
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="sm:col-span-1 flex sm:justify-end">
-                      <button
-                        className="mt-1 rounded-lg px-2 py-2 text-sm text-zinc-500 hover:text-zinc-900"
-                        onClick={() =>
-                          setInvoice((x) => ({
-                            ...x,
-                            items: x.items.filter((_, i) => i !== idx),
-                          }))
-                        }
-                        aria-label={s.remove}
-                        title={s.remove}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <label className="text-sm font-medium text-zinc-700">{s.notes}</label>
-              <textarea
-                className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-400"
-                rows={4}
-                value={invoice.notes}
-                placeholder={s.placeholderNotes}
-                onChange={(e) =>
-                  setInvoice((x) => ({ ...x, notes: e.target.value }))
-                }
-              />
-            </div>
-
-            <p className="mt-4 text-xs text-zinc-500">
-              Free utility (traffic) now. Next (paid): tracking, reminders, and a branded portal.
-            </p>
-          </section>
-
-          {/* Preview */}
-          <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">{s.preview}</h2>
-              <div className="text-xs text-zinc-500">
-                {s.payBy}: <span className="font-medium text-zinc-800">{invoice.dueDate}</span>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-xl border border-zinc-200 p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-sm font-semibold">{s.from}</div>
-                  <div className="text-sm">{invoice.from.name || "—"}</div>
-                  {invoice.from.email ? (
-                    <div className="text-xs text-zinc-600">{invoice.from.email}</div>
-                  ) : null}
-                  {invoice.from.address ? (
-                    <div className="mt-1 whitespace-pre-line text-xs text-zinc-600">
-                      {invoice.from.address}
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="text-right">
-                  <div className="text-sm font-semibold">{s.invoice}</div>
-                  <div className="text-xs text-zinc-600">
-                    {s.invoiceNumber}: {invoice.invoiceNumber || "—"}
-                  </div>
-                  <div className="text-xs text-zinc-600">
-                    {s.issueDate}: {invoice.issueDate || "—"}
-                  </div>
-                  <div className="text-xs text-zinc-600">
-                    {s.dueDate}: {invoice.dueDate || "—"}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <div className="text-sm font-semibold">{s.to}</div>
-                <div className="text-sm">{invoice.to.name || "—"}</div>
-                {invoice.to.email ? (
-                  <div className="text-xs text-zinc-600">{invoice.to.email}</div>
-                ) : null}
-                {invoice.to.address ? (
-                  <div className="mt-1 whitespace-pre-line text-xs text-zinc-600">
-                    {invoice.to.address}
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="mt-5 overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-zinc-200 text-xs text-zinc-600">
-                      <th className="py-2 pr-2">{s.description}</th>
-                      <th className="py-2 pr-2 text-right">{s.qty}</th>
-                      <th className="py-2 pr-2 text-right">{s.unitPrice}</th>
-                      <th className="py-2 pr-2 text-right">{s.tax}</th>
-                      <th className="py-2 text-right">{s.total}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {invoice.items.map((it, idx) => {
-                      const base = it.quantity * it.unitPrice;
-                      const tax = base * (it.taxRatePct / 100);
-                      const lineTotal = base + tax;
-                      return (
-                        <tr key={idx} className="border-b border-zinc-100">
-                          <td className="py-2 pr-2">{it.description || "—"}</td>
-                          <td className="py-2 pr-2 text-right">{it.quantity}</td>
-                          <td className="py-2 pr-2 text-right">
-                            {money(it.unitPrice, invoice.currency, lang)}
-                          </td>
-                          <td className="py-2 pr-2 text-right">
-                            {it.taxRatePct.toFixed(0)}%
-                          </td>
-                          <td className="py-2 text-right">
-                            {money(lineTotal, invoice.currency, lang)}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-4 flex flex-col items-end gap-1 text-sm">
-                <div className="text-zinc-700">
-                  {s.subtotal}:{" "}
-                  <span className="font-medium">
-                    {money(totals.subtotal, invoice.currency, lang)}
-                  </span>
-                </div>
-                <div className="text-zinc-700">
-                  {s.taxTotal}:{" "}
-                  <span className="font-medium">
-                    {money(totals.taxTotal, invoice.currency, lang)}
-                  </span>
-                </div>
-                <div className="text-base font-semibold">
-                  {s.total}: {money(totals.total, invoice.currency, lang)}
-                </div>
-              </div>
-
-              <div className="mt-4 whitespace-pre-line text-xs text-zinc-600">
-                {(invoice.notes || "").trim() ? invoice.notes : s.thankYou}
-              </div>
-            </div>
-          </section>
+          {shareError ? <div className="mt-3 text-xs text-red-600">{shareError}</div> : null}
         </div>
 
         <footer className="mt-10 text-center text-xs text-zinc-500">
-          No accounts. Your draft is saved locally in your browser.
+          Ingen konto. Utkastet lagres lokalt i nettleseren din.
         </footer>
       </div>
     </div>
@@ -612,16 +310,8 @@ function PartyEditor({
     <div className="rounded-2xl border border-zinc-200 p-4">
       <div className="text-sm font-semibold">{title}</div>
       <div className="mt-3 space-y-3">
-        <Field
-          label={labels.name}
-          value={party.name || ""}
-          onChange={(v) => onChange({ ...party, name: v })}
-        />
-        <Field
-          label={labels.email}
-          value={party.email || ""}
-          onChange={(v) => onChange({ ...party, email: v })}
-        />
+        <Field label={labels.name} value={party.name || ""} onChange={(v) => onChange({ ...party, name: v })} />
+        <Field label={labels.email} value={party.email || ""} onChange={(v) => onChange({ ...party, email: v })} />
         <label className="block">
           <div className="text-sm font-medium text-zinc-700">{labels.address}</div>
           <textarea
