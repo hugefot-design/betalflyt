@@ -5,11 +5,21 @@
 :root {
   --background: #ffffff;
   --foreground: #0a0a0a;
-  --muted: #5b5b5b;
-  --border: rgba(15, 23, 42, 0.12);
+  --muted: rgba(0,0,0,0.62);
+  --border: rgba(0,0,0,0.10);
   --card: rgba(0, 0, 0, 0.02);
-  --shadow: 0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.06);
-  --accent: #0a84ff; /* Apple-ish blue */
+  --shadow: 0 1px 2px rgba(0,0,0,0.05), 0 14px 40px rgba(0,0,0,0.08);
+  --accent: #0a84ff;
+}
+
+.dark {
+  --background: #07080a;
+  --foreground: #f5f7ff;
+  --muted: rgba(245,247,255,0.62);
+  --border: rgba(255,255,255,0.12);
+  --card: rgba(255,255,255,0.04);
+  --shadow: 0 1px 2px rgba(0,0,0,0.30), 0 18px 60px rgba(0,0,0,0.45);
+  --accent: #0a84ff;
 }
 
 html, body {
@@ -17,7 +27,7 @@ html, body {
 }
 
 body {
-  background: var(--background);
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(10,132,255,0.14), transparent 60%), var(--background);
   color: var(--foreground);
 }
 
@@ -27,7 +37,7 @@ body {
 
 .card {
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--background);
   border-radius: 24px;
   box-shadow: var(--shadow);
 }
@@ -37,26 +47,28 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  padding: 12px 18px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 650;
   border: 1px solid var(--border);
-  background: #fff;
+  background: transparent;
   color: var(--foreground);
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
 }
 
 .btn:hover {
-  background: rgba(0,0,0,0.02);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  transform: translateY(-1px);
 }
 
 .btn-primary {
-  background: #0a0a0a;
-  color: #fff;
-  border-color: #0a0a0a;
+  background: var(--foreground);
+  color: var(--background);
+  border-color: var(--foreground);
 }
 
 .btn-primary:hover {
-  background: #111;
+  background: color-mix(in srgb, var(--foreground) 92%, black);
 }
 
 .link {
@@ -92,9 +104,9 @@ body {
 .nav {
   position: sticky;
   top: 0;
-  backdrop-filter: blur(10px);
-  background: rgba(255,255,255,0.75);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--background) 80%, transparent);
+  border-bottom: 1px solid var(--border);
   z-index: 20;
 }
 

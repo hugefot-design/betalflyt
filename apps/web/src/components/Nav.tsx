@@ -1,3 +1,5 @@
+import ThemeToggle from "@/components/ThemeToggle";
+
 export default function Nav() {
   return (
     <div className="nav">
@@ -6,7 +8,7 @@ export default function Nav() {
           <a href="/" className="link text-sm font-semibold tracking-tight">
             BetalFlyt
           </a>
-          <div className="flex items-center gap-5 text-sm text-black/70">
+          <div className="flex items-center gap-4 text-sm">
             <a className="link" href="/generator">
               Generator
             </a>
@@ -16,6 +18,7 @@ export default function Nav() {
             <a className="link" href="/pricing">
               Pris
             </a>
+            <ThemeToggle />
           </div>
         </div>
       </div>

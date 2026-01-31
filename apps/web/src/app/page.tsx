@@ -13,13 +13,15 @@ export default function Home() {
                 <span>BetalFlyt – gratis fakturagenerator</span>
               </div>
               <h1 className="h1 mt-5">
-                Lag faktura på sekunder.
+                Lag faktura.
                 <br />
-                Last ned som PDF.
+                Send den.
+                <br />
+                Få betalt.
               </h1>
               <p className="lead mt-4 max-w-2xl">
-                Ren og enkel fakturagenerator på bokmål. Ingen konto i MVP. Del via lenke (beta).
-                Pro (purring/portal) kommer.
+                BetalFlyt er en gratis fakturagenerator på bokmål. Lag PDF på sekunder. Del via lenke.
+                Snart: status, purring og kundeportal.
               </p>
             </div>
 
