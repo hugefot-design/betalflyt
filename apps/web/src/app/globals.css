@@ -27,7 +27,9 @@ html, body {
 }
 
 body {
-  background: radial-gradient(1200px 600px at 50% -10%, rgba(10,132,255,0.14), transparent 60%), var(--background);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
+    var(--background);
   color: var(--foreground);
 }
 
@@ -85,7 +87,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(0,0,0,0.55);
+  color: var(--muted);
 }
 
 .h1 {
@@ -98,7 +100,7 @@ body {
 .lead {
   font-size: 1.05rem;
   line-height: 1.6;
-  color: rgba(0,0,0,0.62);
+  color: var(--muted);
 }
 
 .nav {
@@ -116,9 +118,9 @@ body {
   gap: 6px;
   border-radius: 999px;
   padding: 6px 10px;
-  border: 1px solid rgba(10,132,255,0.25);
-  background: rgba(10,132,255,0.08);
-  color: rgba(0,0,0,0.75);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
   font-size: 12px;
   font-weight: 600;
 }
