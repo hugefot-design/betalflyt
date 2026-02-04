@@ -14,9 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BetalFlyt – gratis fakturagenerator",
-  description:
-    "Lag faktura på sekunder. Last ned PDF. Bokmål først, Pro (purring/portal) kommer.",
+  title: "Market Dashboard",
+  description: "Market-moving news + scoring + futures overview.",
 };
 
 export default function RootLayout({
@@ -25,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="no" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
