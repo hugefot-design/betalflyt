@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 function bucketDot(bucket?: string | null) {
   if (bucket === "critical") return "🔴";
   if (bucket === "high") return "🟠";
