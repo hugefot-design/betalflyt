@@ -62,3 +62,41 @@ model SharedInvoice {
   payload   String
   createdAt DateTime @default(now())
 }
+
+model MarketEvent {
+  id             String   @id
+  createdAt      DateTime @default(now())
+  publishedAtUtc DateTime?
+
+  source     String?
+  title      String
+  summary    String?
+  url        String?  @unique
+
+  eventType  String?
+  sentiment  String?
+
+  crackScore Float
+  bucket     String?
+  topFactors String?
+
+  explanationJson String?
+
+  @@index([createdAt])
+  @@index([crackScore])
+  @@index([bucket])
+}
+
+model MarketTick {
+  id           String   @id
+  createdAtUtc DateTime
+
+  symbol    String
+  price     Float?
+  change    Float?
+  changePct Float?
+  session   String?
+
+  @@index([createdAtUtc])
+  @@index([symbol, createdAtUtc])
+}
